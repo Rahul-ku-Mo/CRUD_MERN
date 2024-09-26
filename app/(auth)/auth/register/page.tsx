@@ -60,7 +60,7 @@ export default function SignUp() {
 
   const handleGoogleSignUp = async () => {
     try {
-      router.push("http://localhost:3000/api/v1/auth/google");
+      router.push(`${process.env.EXPRESS_API_BASE_URL}/auth/google`);
     } catch (err) {
       setError("An error occurred during Google sign-up. Please try again.");
     }
