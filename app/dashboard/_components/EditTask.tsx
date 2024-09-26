@@ -5,56 +5,68 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Task } from "./Dashboard";
+
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { useTaskActions } from "@/hooks/useTask";
+import { useState } from "react";
+import { Edit2Icon } from "lucide-react";
 
-const EditTask = ({
-  editModal,
-  setEditModal,
-}: {
-  editModal: Task | null;
-  setEditModal: any;
-}) => {
+const EditTask = ({ task }: { task: any }) => {
+  const [open, setOpen] = useState(false);
+  const [editTaskData, setEditTaskData] = useState({
+    title: task.title,
+    description: task.description,
+  });
+
+  const { editTask } = useTaskActions(task.columnId);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setEditTaskData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSaveChanges = () => {
+    editTask.mutate({ ...task, ...editTaskData });
+    setOpen(false);
+  };
+
   return (
-    <Dialog open={!!editModal} onOpenChange={() => setEditModal(null)}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Edit2Icon />
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Task</DialogTitle>
         </DialogHeader>
         <Input
-          value={editModal?.name || ""}
-          onChange={(e) =>
-            setEditModal((prev: any) =>
-              prev ? { ...prev, name: e.target.value } : null
-            )
-          }
+          name="title"
+          value={editTaskData.title}
+          onChange={handleInputChange}
           className="mb-4"
           placeholder="Task Name"
         />
         <Textarea
-          value={editModal?.description || ""}
-          onChange={(e) =>
-            setEditModal((prev: any) =>
-              prev ? { ...prev, description: e.target.value } : null
-            )
-          }
+          name="description"
+          value={editTaskData.description}
+          onChange={handleInputChange}
           placeholder="Task Description"
         />
         <DialogFooter>
-          <Button
-          // onClick={() =>
-          //   editModal &&
-          // //  updateTask(editModal.id, editModal.name, editModal.description)
-          // }
-          >
-            Save Changes
-          </Button>
+          <Button onClick={handleSaveChanges}>Save Changes</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
+
 export default EditTask;

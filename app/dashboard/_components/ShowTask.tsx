@@ -5,24 +5,20 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-
 } from "@/components/ui/dialog";
 import { Task } from "./Dashboard";
+import { useState } from "react";
 
-const ShowTask = ({
-  showModal,
-  setShowModal,
-}: {
-  showModal: Task | null;
-  setShowModal: any;
-}) => {
+const ShowTask = ({ task }: { task: Task }) => {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Dialog open={!!showModal} onOpenChange={() => setShowModal(null)}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{showModal?.name}</DialogTitle>
+          <DialogTitle>{task?.title}</DialogTitle>
         </DialogHeader>
-        <DialogDescription>{showModal?.description}</DialogDescription>
+        <DialogDescription>{task?.description}</DialogDescription>
       </DialogContent>
     </Dialog>
   );

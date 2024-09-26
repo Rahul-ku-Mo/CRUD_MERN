@@ -34,65 +34,23 @@ import AddTask from "./AddTask";
 
 export interface Task {
   id: string;
-  name: string;
+  title: string;
   description: string;
+  columnId: string;
   column: "todo" | "progress" | "done";
 }
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showModal, setShowModal] = useState<Task | null>(null);
-  const [editModal, setEditModal] = useState<Task | null>(null);
-  const [deleteModal, setDeleteModal] = useState<Task | null>(null);
-  const [newTaskModal, setNewTaskModal] = useState(false);
-  const [newTaskName, setNewTaskName] = useState("");
-  const [newTaskDescription, setNewTaskDescription] = useState("");
-  const [newTaskColumn, setNewTaskColumn] = useState<
-    "todo" | "progress" | "done"
-  >("todo");
 
   const columns = ["todo", "progress", "done"];
 
   const filteredTasks = tasks.filter(
     (task) =>
-      task.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       task.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const addTask = () => {
-    const newTask: Task = {
-      id: Date.now().toString(),
-      name: newTaskName,
-      description: newTaskDescription,
-      column: newTaskColumn,
-    };
-    setTasks([...tasks, newTask]);
-    setNewTaskModal(false);
-    setNewTaskName("");
-    setNewTaskDescription("");
-    setNewTaskColumn("todo");
-  };
-
-  const updateTask = (
-    taskId: string,
-    newName: string,
-    newDescription: string
-  ) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === taskId
-          ? { ...task, name: newName, description: newDescription }
-          : task
-      )
-    );
-    setEditModal(null);
-  };
-
-  const deleteTask = (taskId: string) => {
-    setTasks(tasks.filter((task) => task.id !== taskId));
-    setDeleteModal(null);
-  };
 
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
@@ -188,52 +146,25 @@ export default function Dashboard() {
                                 {...provided.dragHandleProps}
                                 className="mb-2"
                               >
-                                <CardContent className="p-4 flex justify-between items-center">
-                                  <span>{task.name}</span>
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        className="h-8 w-8 p-0"
-                                      >
-                                        <MoreHorizontal className="h-4 w-4" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                      <DropdownMenuItem
-                                        onSelect={() => setShowModal(task)}
-                                      >
-                                        Show
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onSelect={() => setEditModal(task)}
-                                      >
-                                        Edit
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onSelect={() => setDeleteModal(task)}
-                                      >
-                                        Delete
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
+                                <CardContent className="p-4 flex justify-between items-center gap-12">
+                                  <div>{task.title}</div>
+                                  <p>{task.description}</p>
+
+                                  <div className="flex gap-2">
+                                    <ShowTask task={task} />
+                                    <EditTask task={task} />
+                                    <DeleteTask
+                                      columnId={task.columnId}
+                                      taskId={task.id}
+                                    />
+                                  </div>
                                 </CardContent>
                               </Card>
                             )}
                           </Draggable>
                         ))}
                       {provided.placeholder}
-                      <Button
-                        onClick={() => {
-                          setNewTaskColumn(
-                            columnId as "todo" | "progress" | "done"
-                          );
-                          setNewTaskModal(true);
-                        }}
-                        className="mt-2 w-full"
-                      >
-                        Add Task
-                      </Button>
+                      <AddTask columnId={columnId} />
                     </div>
                   )}
                 </Droppable>
@@ -242,11 +173,6 @@ export default function Dashboard() {
           </DragDropContext>
         </div>
       </main>
-
-      <ShowTask showModal={showModal} setShowModal={setShowModal} />
-      <EditTask editModal={editModal} setEditModal={setEditModal} />
-      <DeleteTask deleteModal={deleteModal} setDeleteModal={setDeleteModal} />
-      <AddTask newTaskModal={newTaskModal} setNewTaskModal={setNewTaskModal} />
     </div>
   );
 }

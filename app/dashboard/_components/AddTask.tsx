@@ -1,6 +1,7 @@
 "use client";
 import {
   Dialog,
+  DialogTrigger,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -10,19 +11,38 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-const AddTask = ({
-  newTaskModal,
-  setNewTaskModal,
-}: {
-  newTaskModal: any;
-  setNewTaskModal: any;
-}) => {
+import { useTaskActions } from "@/hooks/useTask";
+
+const AddTask = ({ columnId }: { columnId: string }) => {
+  const [open, setOpen] = useState(false);
   const [newTaskName, setNewTaskName] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
 
+  const { createTask } = useTaskActions(columnId);
+
+  const handleCreate = () => {
+    if (!newTaskName || !newTaskDescription) {
+      return;
+    }
+
+    createTask.mutate({
+      name: newTaskName,
+      description: newTaskDescription,
+      column: columnId,
+    } as any);
+
+    setNewTaskName("");
+    setNewTaskDescription("");
+
+    setOpen(false);
+  };
+
   return (
     <>
-      <Dialog open={newTaskModal} onOpenChange={setNewTaskModal}>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline">Add Task</Button>
+        </DialogTrigger>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Task</DialogTitle>
@@ -39,7 +59,7 @@ const AddTask = ({
             placeholder="Task Description"
           />
           <DialogFooter>
-            <Button >Create Task</Button>
+            <Button onClick={handleCreate}>Create Task</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
