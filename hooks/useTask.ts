@@ -7,7 +7,9 @@ export const useTask = (columnId: string) => {
   const { data, isPending } = useQuery({
     queryKey: ["tasks", columnId],
     queryFn: async () => {
-      const response = await fetch(`${process.env.EXPRESS_API_BASE_URL}/task`);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/task`
+      );
 
       return await response.json();
     },
@@ -19,13 +21,16 @@ export const useTask = (columnId: string) => {
 export const useTaskActions = (columnId: string) => {
   const createTask = useMutation({
     mutationFn: async (data) => {
-      const response = await fetch(`${process.env.EXPRESS_API_BASE_URL}/task`, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/task`,
+        {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       return await response.json();
     },
@@ -39,7 +44,7 @@ export const useTaskActions = (columnId: string) => {
   const deleteTask = useMutation({
     mutationFn: async (id) => {
       const response = await fetch(
-        `${process.env.EXPRESS_API_BASE_URL}/task/${id}`,
+        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/task/${id}`,
         {
           method: "DELETE",
         }
@@ -57,7 +62,7 @@ export const useTaskActions = (columnId: string) => {
   const editTask = useMutation({
     mutationFn: async (data: any) => {
       const response = await fetch(
-        `${process.env.EXPRESS_API_BASE_URL}/task/${data.id}`,
+        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/task/${data.id}`,
         {
           method: "PUT",
           body: JSON.stringify(data),

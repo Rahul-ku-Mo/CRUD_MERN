@@ -40,7 +40,7 @@ export default function SignUp() {
 
     try {
       const response = await fetch(
-        `${process.env.EXPRESS_API_BASE_URL}/auth/register`,
+        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/auth/register`,
         {
           method: "POST",
           headers: {
@@ -59,8 +59,9 @@ export default function SignUp() {
   };
 
   const handleGoogleSignUp = async () => {
+   
     try {
-      router.push(`${process.env.EXPRESS_API_BASE_URL}/auth/google`);
+      router.replace(`${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/auth/google`);
     } catch (err) {
       setError("An error occurred during Google sign-up. Please try again.");
     }

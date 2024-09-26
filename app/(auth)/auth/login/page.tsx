@@ -43,7 +43,7 @@ export default function Login() {
 
   const handleGoogleLogin = async () => {
     try {
-      router.push(`${process.env.EXPRESS_API_BASE_URL}/auth/google`);
+      router.replace(`${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/auth/google`);
     } catch (err) {
       setError("An error occurred during Google login. Please try again.");
     }
