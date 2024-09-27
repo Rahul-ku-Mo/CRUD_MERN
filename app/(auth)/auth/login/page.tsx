@@ -74,6 +74,7 @@ export default function Login() {
         `${process.env.NEXT_PUBLIC_API_URL}/auth/google`,
         {
           method: "GET",
+          credentials: 'include'
         }
       );
 
