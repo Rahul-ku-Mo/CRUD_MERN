@@ -11,7 +11,6 @@ export const useTaskActions = () => {
     mutationFn: async (data) => {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, {
         method: "POST",
-        credentials: "include",
         body: JSON.stringify(data),
         headers: {
           "Content-Type": "application/json",
@@ -32,7 +31,6 @@ export const useTaskActions = () => {
     mutationFn: async (id) => {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks/${id}`, {
         method: "DELETE",
-        credentials: "include",
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -51,7 +49,7 @@ export const useTaskActions = () => {
         `${process.env.NEXT_PUBLIC_API_URL}/tasks/${data.id}`,
         {
           method: "PUT",
-          credentials: "include",
+
           body: JSON.stringify(data),
           headers: {
             "Content-Type": "application/json",
