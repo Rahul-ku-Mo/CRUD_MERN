@@ -1,34 +1,139 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Task Manager Project
+
+This project is a Task Manager application built using Next.js with the App Router and TanStack Query for state management on the frontend. The application allows users to register, log in, and manage their tasks efficiently. Its a minimalist version of Trello. 
+
+## Features
+
+- User Authentication (Sign Up, Log In)
+- Task Management (Create, Read, Update, Delete tasks)
+- You can sort your task and search your task according to columns and cards
+- You can set deadlines and reminder for tasks.
+- State Management using TanStack Query
+- Responsive UI using Tailwind CSS
+- Google OAuth Integration
+
+## Technologies Used
+
+- [Next.js](https://nextjs.org/) - React framework for server-side rendering and static site generation
+- [TanStack Query](https://tanstack.com/query/latest) - Powerful data-fetching and state management library
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [React Icons](https://react-icons.github.io/react-icons/) - Popular icons library for React
+- [js-cookie](https://github.com/js-cookie/js-cookie) - JavaScript library for handling cookies
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js (>= 14.x)
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/your-username/task-manager.git
+cd task-manager
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Create a `.env` file in the root directory and add your environment variables:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+```
+
+### Running the Development Server
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Building for Production
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+```bash
+npm run build
+# or
+yarn build
+```
 
-## Learn More
+### Starting the Production Server
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm start
+# or
+yarn start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```plaintext
+.
+├── components
+│   ├── ui
+│   │   ├── alert.tsx
+│   │   ├── button.tsx
+│   │   ├── card.tsx
+│   │   ├── checkbox.tsx
+│   │   ├── input.tsx
+│   │   ├── label.tsx
+│   │   └── loader.tsx
+├── pages
+│   ├── api
+│   │   └── auth
+│   │       ├── login.ts
+│   │       ├── logout.ts
+│   │       └── register.ts
+│   ├── dashboard.tsx
+│   ├── index.tsx
+│   └── auth
+│       ├── login.tsx
+│       └── register.tsx
+├── public
+│   └── vercel.svg
+├── styles
+│   └── globals.css
+├── .env.local
+├── .gitignore
+├── next.config.js
+├── package.json
+├── README.md
+└── tsconfig.json
+```
 
-## Deploy on Vercel
+## Usage
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Authentication
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- **Sign Up**: Users can register by providing their name, email, and password.
+- **Log In**: Users can log in using their email and password or via Google OAuth.
+
+### Task Management
+
+- **Create Task**: Users can create new tasks.
+- **Read Tasks**: Users can view their tasks.
+- **Update Task**: Users can update existing tasks.
+- **Delete Task**: Users can delete tasks.
+
+
+
+## Acknowledgements
+
+- [Next.js](https://nextjs.org/)
+- [TanStack Query](https://tanstack.com/query/latest)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [React Icons](https://react-icons.github.io/react-icons/)
+- [js-cookie](https://github.com/js-cookie/js-cookie)
+
+---
