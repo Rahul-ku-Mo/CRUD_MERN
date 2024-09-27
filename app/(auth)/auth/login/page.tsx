@@ -18,11 +18,13 @@ import { FcGoogle } from "react-icons/fc";
 import Cookies from "js-cookie";
 //@ts-ignore
 import { Loader } from "@/components/ui/Loader";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -93,16 +95,30 @@ export default function Login() {
                 required
               />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="showPassword"
+                checked={showPassword}
+                onCheckedChange={(checked) => setShowPassword(checked === true)}
+              />
+              <Label
+                htmlFor="showPassword"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Show password
+              </Label>
             </div>
             {error && (
               <Alert variant="destructive" className="mb-4">

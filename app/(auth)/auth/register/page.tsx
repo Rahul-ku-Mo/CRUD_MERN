@@ -17,12 +17,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FcGoogle } from "react-icons/fc";
 import Cookies from "js-cookie";
 import { Loader } from "@/components/ui/Loader";
+import { Checkbox } from "@/components/ui/checkbox";
+
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -80,14 +84,22 @@ export default function SignUp() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 pt-16">
-      <Card className="w-full max-w-md bg-white">
+    <div className="flex items-center justify-end absolute inset-0 z-10 pt-14 overflow-hidden">
+      <div className="bg-blue-500/20 w-full h-full grow relative">
+        <div className="text-xl p-2 absolute bottom-0 font-bold">
+          <h1>
+            "Welcome to Task Manager, try managing your tasks. You won't regret"
+          </h1>
+          <p className="text-sm opacity-50 px-2">by Rahul K.M</p>
+        </div>
+      </div>
+      <Card className="w-full h-full rounded-none m-0 max-w-md bg-white">
         <CardHeader>
           <CardTitle>Sign Up</CardTitle>
           <CardDescription>Create a new account to get started</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignUp} className="space-y-4">
+          <form onSubmit={handleSignUp} className="space-y-2">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
               <Input
@@ -114,23 +126,51 @@ export default function SignUp() {
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="showPassword"
+                checked={showPassword}
+                onCheckedChange={(checked) => setShowPassword(checked === true)}
+              />
+              <Label
+                htmlFor="showPassword"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Show password
+              </Label>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
               <Input
                 id="confirmPassword"
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="showConfirmPassword"
+                checked={showConfirmPassword}
+                onCheckedChange={(checked) =>
+                  setShowConfirmPassword(checked === true)
+                }
+              />
+              <Label
+                htmlFor="showConfirmPassword"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Show password
+              </Label>
             </div>
             {error && (
               <Alert variant="destructive" className="mb-4">
