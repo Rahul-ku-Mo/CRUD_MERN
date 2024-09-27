@@ -5,7 +5,7 @@ export const middleware = (req: NextRequest) => {
   const token = url.searchParams.get("token");
 
   if (!token) {
-    return NextResponse.next(); // Skip middleware if no token
+    return NextResponse.next();
   }
 
   if (url.pathname.startsWith("/")) {
