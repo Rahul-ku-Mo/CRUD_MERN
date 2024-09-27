@@ -75,30 +75,8 @@ export default function SignUp() {
     }
   };
 
-  const handleGoogleSignUp = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/google`,
-        {
-          method: "GET",
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) {
-        setError("Signup Failed");
-      }
-
-      const data = await response.json();
-      const { token } = data;
-
-      Cookies.set("accessToken", token);
-      router.push("/dashboard");
-    } catch (err) {
-      setError("An error occurred during Google sign-up. Please try again.");
-      setIsLoading(false);
-    }
+  const handleGoogleSignUp = () => {
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
   };
 
   return (
