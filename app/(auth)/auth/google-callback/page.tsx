@@ -18,7 +18,7 @@ function CallbackContent() {
     router.push("/auth/login?error=NoCode");
   }
 
-  async function exchangeTokenForAccessToken(code : string) {
+  async function exchangeTokenForAccessToken(code: string) {
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/exchange-token`,
@@ -33,7 +33,7 @@ function CallbackContent() {
 
       if (response.ok) {
         const { token } = await response.json();
-       
+
         Cookies.set("accessToken", token);
         // Redirect to dashboard
         router.push("/dashboard");
@@ -56,7 +56,13 @@ function CallbackContent() {
 
 export default function GoogleCallback() {
   return (
-    <Suspense fallback={<Loader />}>
+    <Suspense
+      fallback={
+        <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+          <Loader />
+        </div>
+      }
+    >
       <CallbackContent />
     </Suspense>
   );

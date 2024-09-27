@@ -19,7 +19,6 @@ const ShowTask = ({ task }: { task: any }) => {
   const dueDate = task?.dueDate ? new Date(task.dueDate) : null;
   const reminder = task?.reminder ? new Date(task.reminder) : null;
 
-  console.log(task)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
