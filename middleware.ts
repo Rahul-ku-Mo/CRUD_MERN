@@ -2,12 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const middleware = (req: NextRequest) => {
   const url = req.nextUrl;
-  const token = url.searchParams.get("token");
+  const token = url.searchParams.get("accessToken");
 
-  const res = NextResponse.redirect(new URL(url.pathname, url.origin));
+  if (!token || token.length !== 32) {
+    // Redirect only if token is missing or invalid
+    return NextResponse.redirect(new URL(url.pathname, url.origin));
+  }
 
-  res.headers.set("Set-Cookie", `accessToken=${token};`);
-
+  const res = NextResponse.next(); // Don't redirect if token is valid
+  res.headers.set(
+    "Set-Cookie",
+    `accessToken=${token}; Path=/; ${
+      process.env.NODE_ENV === "production" ? "HttpOnly; Secure" : ""
+    }`
+  );
   return res;
 };
 
