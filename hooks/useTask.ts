@@ -9,17 +9,14 @@ export const useTaskActions = () => {
 
   const createTask = useMutation({
     mutationFn: async (data) => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/tasks`,
-        {
-          method: "POST",
-          body: JSON.stringify(data),
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
       return await response.json();
     },
@@ -32,15 +29,12 @@ export const useTaskActions = () => {
 
   const deleteTask = useMutation({
     mutationFn: async (id) => {
-      await fetch(
-        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/tasks/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -52,7 +46,7 @@ export const useTaskActions = () => {
   const editTask = useMutation({
     mutationFn: async (data: any) => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/tasks/${data.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/tasks/${data.id}`,
         {
           method: "PUT",
           body: JSON.stringify(data),
