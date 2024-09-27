@@ -70,7 +70,22 @@ export default function Login() {
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true);
-      router.replace(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/google`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        setError("Login Failed");
+      }
+
+      const data = await response.json();
+      const { token } = data;
+
+      Cookies.set("accessToken", token);
+      router.push("/dashboard");
     } catch (err) {
       setError("An error occurred during Google login. Please try again.");
       setIsLoading(false);

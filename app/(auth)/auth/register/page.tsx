@@ -78,7 +78,22 @@ export default function SignUp() {
   const handleGoogleSignUp = async () => {
     try {
       setIsLoading(true);
-      router.replace(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/google`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        setError("Signup Failed");
+      }
+
+      const data = await response.json();
+      const { token } = data;
+
+      Cookies.set("accessToken", token);
+      router.push("/dashboard");
     } catch (err) {
       setError("An error occurred during Google sign-up. Please try again.");
       setIsLoading(false);
