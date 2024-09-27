@@ -1,174 +1,192 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
+import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
 import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  DropResult,
-} from "react-beautiful-dnd";
-import { Button } from "@/components/ui/button";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, LogOut } from "lucide-react";
-import ShowTask from "./ShowTask";
-import EditTask from "./EditTask";
-import DeleteTask from "./DeleteTask";
-import AddTask from "./AddTask";
+
+import Navbar from "./Navbar";
+import ColumnCard from "./columns/ColumnCard";
+import { useColumn, useColumnActions } from "@/hooks/useColumn";
+import AddColumn from "./columns/AddColumn";
+import { queryClient } from "@/lib/queryClient";
 
 export interface Task {
   id: string;
   title: string;
   description: string;
   columnId: string;
-  column: "todo" | "progress" | "done";
+  column: string;
+  User: any;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  dueDate: Date | null
+  reminder: Date | null
 }
 
 export default function Dashboard() {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterType, setFilterType] = useState<"cards" | "columns">("cards")
+  const [sortBy, setSortBy] = useState<"dueDate" | "createdAt">("createdAt")
+  const { data: columns, isPending } = useColumn();
 
-  const columns = ["todo", "progress", "done"];
+  const { updateTaskOrder } = useColumnActions();
 
-  const filteredTasks = tasks.filter(
-    (task) =>
-      task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      task.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredAndSortedColumns = useMemo(() => {
+    if (!columns) return []
 
-  const onDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
+    const filtered = filterType === "columns"
+      ? columns.filter((column: any) =>
+          column.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      : columns.map((column: any) => ({
+          ...column,
+          tasks: column.tasks.filter(
+            (task: Task) =>
+              task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              task.description.toLowerCase().includes(searchTerm.toLowerCase())
+          ),
+        }))
 
-    const { source, destination } = result;
+    return filtered.map((column: any) => ({
+      ...column,
+      tasks: column.tasks.sort((a: Task, b: Task) => {
+        if (sortBy === "dueDate") {
+          if (!a.dueDate) return 1
+          if (!b.dueDate) return -1
+          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+        }
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      }),
+    }))
+  }, [columns, searchTerm, filterType, sortBy])
 
-    if (source.droppableId === destination.droppableId) {
-      // Reordering within the same column
-      const columnTasks = tasks.filter(
-        (task) => task.column === source.droppableId
-      );
-      const reorderedTasks = Array.from(columnTasks);
-      const [reorderedItem] = reorderedTasks.splice(source.index, 1);
-      reorderedTasks.splice(destination.index, 0, reorderedItem);
+  const onDragEnd = useCallback(
+    (result: DropResult) => {
+      const { source, destination } = result;
 
-      const updatedTasks = tasks.map((task) =>
-        task.column === source.droppableId
-          ? reorderedTasks[tasks.indexOf(task)] || task
-          : task
-      );
+      let updatedSourceTasks: any = [];
+      let updatedDestinationTasks: any = [];
 
-      setTasks(updatedTasks);
-    } else {
-      // Moving between columns
-      const updatedTasks = tasks.map((task) => {
-        if (task.id === result.draggableId) {
-          return {
-            ...task,
-            column: destination.droppableId as "todo" | "progress" | "done",
+      if (!destination) return;
+
+      queryClient.setQueryData(["columns"], (prevColumns: any) => {
+        const newColumns = [...prevColumns];
+
+        const sourceColIndex = newColumns.findIndex(
+          (col) => col.id === source.droppableId
+        );
+        const destColIndex = newColumns.findIndex(
+          (col) => col.id === destination.droppableId
+        );
+
+        const sourceCol = newColumns[sourceColIndex];
+        const destCol = newColumns[destColIndex];
+
+        const sourceTasks = [...sourceCol.tasks];
+        const destTasks =
+          sourceCol === destCol ? sourceTasks : [...destCol.tasks];
+
+        const [movedTask] = sourceTasks.splice(source.index - 1, 1);
+        destTasks.splice(destination.index, 0, movedTask);
+
+        updatedDestinationTasks = destTasks.map((task, index) => ({
+          ...task,
+          order: index + 1,
+          columnId: destCol.id,
+        }));
+
+        updatedSourceTasks = sourceTasks.map((task, index) => ({
+          ...task,
+          order: index + 1,
+          columnId: sourceCol.id,
+        }));
+
+        newColumns[sourceColIndex] = {
+          ...sourceCol,
+          tasks: updatedSourceTasks,
+        };
+
+        if (sourceCol !== destCol) {
+          newColumns[destColIndex] = {
+            ...destCol,
+            tasks: updatedDestinationTasks,
           };
         }
-        return task;
+
+        return newColumns;
       });
 
-      setTasks(updatedTasks);
-    }
-  };
+      updateTaskOrder.mutate({
+        sourceTasks: updatedSourceTasks,
+        destinationTasks: updatedDestinationTasks,
+        sourceColumnId: source.droppableId,
+        destinationColumnId: destination.droppableId,
+      });
+    },
+    [columns, updateTaskOrder]
+  );
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex-shrink-0 flex items-center">
-              <h1 className="text-xl font-bold">Task Manager</h1>
-            </div>
-            <div className="flex items-center">
-              <Button
-                variant="ghost"
-                onClick={() => console.log("Logout clicked")}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </Button>
-            </div>
+      <Navbar />
+      <main className="py-6 sm:px-6 lg:px-8">
+        <div className="px-4 pb-6 sm:px-0">
+        <div className="flex space-x-4 mb-6">
+            <Input
+              type="text"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-grow"
+            />
+            <Select
+              value={filterType}
+              onValueChange={(value: "cards" | "columns") =>
+                setFilterType(value)
+              }
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cards">Cards</SelectItem>
+                <SelectItem value="columns">Columns</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={sortBy}
+              onValueChange={(value: "dueDate" | "createdAt") =>
+                setSortBy(value)
+              }
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="dueDate">Due Date</SelectItem>
+                <SelectItem value="createdAt">Newest</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <Input
-            type="text"
-            placeholder="Search tasks..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="mb-6"
-          />
-
           <DragDropContext onDragEnd={onDragEnd}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {columns.map((columnId) => (
-                <Droppable key={columnId} droppableId={columnId}>
-                  {(provided) => (
-                    <div
-                      {...provided.droppableProps}
-                      ref={provided.innerRef}
-                      className="bg-gray-200 p-4 rounded-lg"
-                    >
-                      <h2 className="font-bold mb-4 capitalize">{columnId}</h2>
-                      {filteredTasks
-                        .filter((task) => task.column === columnId)
-                        .map((task, index) => (
-                          <Draggable
-                            key={task.id}
-                            draggableId={task.id}
-                            index={index}
-                          >
-                            {(provided) => (
-                              <Card
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className="mb-2"
-                              >
-                                <CardContent className="p-4 flex justify-between items-center gap-12">
-                                  <div>{task.title}</div>
-                                  <p>{task.description}</p>
-
-                                  <div className="flex gap-2">
-                                    <ShowTask task={task} />
-                                    <EditTask task={task} />
-                                    <DeleteTask
-                                      columnId={task.columnId}
-                                      taskId={task.id}
-                                    />
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            )}
-                          </Draggable>
-                        ))}
-                      {provided.placeholder}
-                      <AddTask columnId={columnId} />
-                    </div>
-                  )}
-                </Droppable>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4 overflow-x-auto h-full flex-nowrap">
+              {!isPending &&
+                filteredAndSortedColumns?.map((column: any) => (
+                  <Droppable key={column.id} droppableId={column.id}>
+                    {(provided) => (
+                      <ColumnCard column={column} provided={provided} />
+                    )}
+                  </Droppable>
+                ))}
+              <AddColumn />
             </div>
           </DragDropContext>
         </div>

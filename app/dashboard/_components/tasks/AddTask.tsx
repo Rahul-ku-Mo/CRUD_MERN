@@ -18,7 +18,7 @@ const AddTask = ({ columnId }: { columnId: string }) => {
   const [newTaskName, setNewTaskName] = useState("");
   const [newTaskDescription, setNewTaskDescription] = useState("");
 
-  const { createTask } = useTaskActions(columnId);
+  const { createTask } = useTaskActions();
 
   const handleCreate = () => {
     if (!newTaskName || !newTaskDescription) {
@@ -26,9 +26,9 @@ const AddTask = ({ columnId }: { columnId: string }) => {
     }
 
     createTask.mutate({
-      name: newTaskName,
+      title: newTaskName,
       description: newTaskDescription,
-      column: columnId,
+      columnId: columnId,
     } as any);
 
     setNewTaskName("");
@@ -41,7 +41,9 @@ const AddTask = ({ columnId }: { columnId: string }) => {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline">Add Task</Button>
+          <Button variant="default" className="w-full ">
+            Add Task
+          </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>

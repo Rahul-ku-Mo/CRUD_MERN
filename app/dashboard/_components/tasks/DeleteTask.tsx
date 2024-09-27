@@ -21,12 +21,16 @@ const DeleteTask = ({
   taskId: string;
 }) => {
   const [open, setOpen] = useState(false);
-  const { deleteTask } = useTaskActions(columnId);
+  const { deleteTask } = useTaskActions();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Trash2Icon />
+      
+        <Button variant="destructive" className="flex gap-2 px-2 text-white">
+        <Trash2Icon  className="size-4" />
+          <span className="text-xs sr-only">Edit</span>
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

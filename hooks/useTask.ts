@@ -2,32 +2,21 @@
 
 import { queryClient } from "@/lib/queryClient";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import Cookies from "js-cookie";
 
-export const useTask = (columnId: string) => {
-  const { data, isPending } = useQuery({
-    queryKey: ["tasks", columnId],
-    queryFn: async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/task`
-      );
+export const useTaskActions = () => {
+  const accessToken = Cookies.get("accessToken");
 
-      return await response.json();
-    },
-  });
-
-  return { data, isPending };
-};
-
-export const useTaskActions = (columnId: string) => {
   const createTask = useMutation({
     mutationFn: async (data) => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/task`,
+        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/tasks`,
         {
           method: "POST",
           body: JSON.stringify(data),
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );
@@ -36,25 +25,26 @@ export const useTaskActions = (columnId: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["tasks", columnId],
+        queryKey: ["columns"],
       });
     },
   });
 
   const deleteTask = useMutation({
     mutationFn: async (id) => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/task/${id}`,
+      await fetch(
+        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/tasks/${id}`,
         {
           method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
-
-      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["tasks", columnId],
+        queryKey: ["columns"],
       });
     },
   });
@@ -62,12 +52,13 @@ export const useTaskActions = (columnId: string) => {
   const editTask = useMutation({
     mutationFn: async (data: any) => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/task/${data.id}`,
+        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/tasks/${data.id}`,
         {
           method: "PUT",
           body: JSON.stringify(data),
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );
@@ -76,7 +67,7 @@ export const useTaskActions = (columnId: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["tasks", columnId],
+        queryKey: ["columns"],
       });
     },
   });

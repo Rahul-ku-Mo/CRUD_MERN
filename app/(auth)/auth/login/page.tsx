@@ -15,55 +15,80 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FcGoogle } from "react-icons/fc";
+import Cookies from "js-cookie";
+//@ts-ignore
+import { Loader } from "@/components/ui/Loader";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     if (!email || !password) {
       setError("Please fill in all fields");
+      setIsLoading(false);
       return;
     }
 
     try {
-      // Implement login logic here
-      console.log("Login with:", email, password);
-      // If login is successful, redirect to the board page
-      // router.push('/board')
-    } catch (err) {
-      setError("Invalid email or password. Please try again.");
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
+
+      if (response.status === 200) {
+        const { token } = await response.json();
+        Cookies.set("accessToken", token);
+        router.push("/dashboard");
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error);
+      }
+    } catch (err: any) {
+      setError(err.error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleGoogleLogin = async () => {
     try {
-      router.replace(`${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/auth/google`);
+      setIsLoading(true);
+      router.replace(
+        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/auth/google`
+      );
     } catch (err) {
       setError("An error occurred during Google login. Please try again.");
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md bg-white">
         <CardHeader>
-          <CardTitle>Login</CardTitle>
+          <CardTitle className="text-lg">Login</CardTitle>
           <CardDescription>
             Enter your credentials to access your account
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -87,7 +112,13 @@ export default function Login() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full">
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? <Loader className="mr-2" /> : null}
               Log In
             </Button>
           </form>
@@ -107,8 +138,13 @@ export default function Login() {
             variant="outline"
             className="w-full"
             onClick={handleGoogleLogin}
+            disabled={isLoading}
           >
-            <FcGoogle className="mr-2 h-4 w-4" />
+            {isLoading ? (
+              <Loader className="mr-2" />
+            ) : (
+              <FcGoogle className="mr-2 h-4 w-4" />
+            )}
             Log in with Google
           </Button>
           <p className="text-center text-sm text-gray-600">

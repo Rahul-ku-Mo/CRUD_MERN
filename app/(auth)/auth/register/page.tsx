@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FcGoogle } from "react-icons/fc";
+import Cookies from "js-cookie";
+import { Loader } from "@/components/ui/Loader";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -22,19 +24,23 @@ export default function SignUp() {
   const [name, setName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     if (!email || !password) {
       setError("Please fill in all fields");
+      setIsLoading(false);
       return;
     }
 
     if (confirmPassword !== password) {
       setError("Please make sure your passwords match");
+      setIsLoading(false);
       return;
     }
 
@@ -53,34 +59,54 @@ export default function SignUp() {
           }),
         }
       );
+
+      if (response.status === 200) {
+        const { token } = await response.json();
+        Cookies.set("accessToken", token);
+        router.push("/dashboard");
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error);
+      }
     } catch (err) {
       setError("An error occurred during sign-up. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleGoogleSignUp = async () => {
-   
     try {
-      router.replace(`${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/auth/google`);
+      setIsLoading(true);
+      router.replace(
+        `${process.env.NEXT_PUBLIC_EXPRESS_API_BASE_URL}/auth/google`
+      );
     } catch (err) {
       setError("An error occurred during Google sign-up. Please try again.");
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <Card className="w-full max-w-md">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 pt-16">
+      <Card className="w-full max-w-md bg-white">
         <CardHeader>
           <CardTitle>Sign Up</CardTitle>
           <CardDescription>Create a new account to get started</CardDescription>
         </CardHeader>
         <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
           <form onSubmit={handleSignUp} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -103,7 +129,24 @@ export default function SignUp() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full">
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="Enter your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? <Loader className="mr-2" /> : null}
               Sign Up
             </Button>
           </form>
@@ -123,8 +166,13 @@ export default function SignUp() {
             variant="outline"
             className="w-full"
             onClick={handleGoogleSignUp}
+            disabled={isLoading}
           >
-            <FcGoogle className="mr-2 h-4 w-4" />
+            {isLoading ? (
+              <Loader className="mr-2" />
+            ) : (
+              <FcGoogle className="mr-2 h-4 w-4" />
+            )}
             Sign up with Google
           </Button>
           <p className="text-center text-sm text-gray-600">
