@@ -13,6 +13,7 @@ export const useColumn = () => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/columns`,
         {
+          credentials: "include",
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -35,6 +36,7 @@ export const useColumnActions = () => {
         `${process.env.NEXT_PUBLIC_API_URL}/columns`,
         {
           method: "POST",
+          credentials: "include",
           body: JSON.stringify(data),
           headers: {
             "Content-Type": "application/json",
@@ -56,6 +58,7 @@ export const useColumnActions = () => {
     mutationFn: async (id: string) => {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/columns/${id}`, {
         method: "DELETE",
+        credentials: "include",
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -74,6 +77,7 @@ export const useColumnActions = () => {
         `${process.env.NEXT_PUBLIC_API_URL}/columns/${data.id}`,
         {
           method: "PUT",
+          credentials: "include",
           body: JSON.stringify({ name: data.name, order: data.order }),
           headers: {
             "Content-Type": "application/json",
@@ -100,6 +104,7 @@ export const useColumnActions = () => {
     }) => {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/columns/orderTasks`, {
         method: "PUT",
+        credentials: "include",
         body: JSON.stringify({
           destinationColumnId: data.destinationColumnId,
           destinationTasks: data.destinationTasks,
